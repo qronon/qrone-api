@@ -1,17 +1,23 @@
 package org.qrone.api;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.*;
 
+import org.qrone.api.util.APIServlet;
+
 @SuppressWarnings("serial")
-public class UUIDAPI extends HttpServlet {
-	public void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
-		resp.setContentType("text/plain");
+public class UUIDAPI extends APIServlet {
+	
+	@Override
+	public Object apiRequest(HttpServletRequest req, HttpServletResponse resp,
+			UUID uuid, Map result) {
 		
-		UUID uuid = UUID.randomUUID();
-		resp.getWriter().println("{\"uuid\":\"" + uuid.toString() + "\"}");
+		UUID uid = UUID.randomUUID();
+		result.put("uuid", uid.toString());
+		return result;
 	}
+	
 }

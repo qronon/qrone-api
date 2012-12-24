@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+jarsExcludedFromWebInfLib=
 lastWarOutDir=/Users/ju-tabuchi/Documents/workspace/qrone-api/war
 warSrcDir=war
-warSrcDirIsOutput=false
+warSrcDirIsOutput=true
