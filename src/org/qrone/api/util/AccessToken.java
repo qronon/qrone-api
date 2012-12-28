@@ -14,11 +14,15 @@ import org.qrone.util.Hex;
 
 public class AccessToken {
 	
-	public static final String MASTER   = "M";
-	public static final String GRANT_READ    = "E";
-	public static final String GRANT_WRITE   = "I";
-	public static final String READ     = "R";
+	public static final String MASTER   = "X";
+	public static final String GRANT    = "G";
+	public static final String PAY      = "P";
+	public static final String WRITEC   = "D";
 	public static final String WRITE    = "W";
+	public static final String READC    = "C";
+	public static final String READ     = "R";
+	public static final String LOGIN    = "L";
+	public static final String ADD      = "A";
 	
 	//   Token-[Scope1][:[Scope2][:[Scope3]...]]
 	//   .ID-[userID]
@@ -65,8 +69,16 @@ public class AccessToken {
 	}
 	
 	public boolean validate(UUID signersecret, String scope){
-		if(validate(signersecret) && scopes.contains(scope)){
-			return true;
+		if(validate(signersecret)){
+			if(scopes.contains(scope) || scopes.contains("X")){
+				return true;
+			}
+			if(scope.equals("R") && scopes.contains("C")){
+				return true;
+			}
+			if(scope.equals("W") && scopes.contains("D")){
+				return true;
+			}
 		}
 		return false;
 	}
