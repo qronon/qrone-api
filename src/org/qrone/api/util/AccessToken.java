@@ -2,8 +2,10 @@ package org.qrone.api.util;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,7 +21,6 @@ public class AccessToken {
 			
 	private String id;
 	private String asid;
-	private String signerid;
 	private Set<String> scopes;
 	private long timestamp;
 	private byte[] sign;
@@ -79,24 +80,37 @@ public class AccessToken {
 		AccessToken t = new AccessToken();
 		try{
 			String[] s = tokenString.split("\\.");
+			Map<String, String> map = new HashMap<String, String>();
+			for (int i = 0; i < s.length; i++) {
+				map.put(s[i].substring(0, s[i].indexOf("-")), s[i]);
+			}
 			
-			if(s.length > 2){
-				String[] ss = s[2].substring("Sign-".length()).split("\\:");
+
+			String token = map.get("Token");
+			if(token != null){
+				String[] sc = token.substring("Token-".length()).split("\\:");
+				t.scopes = new HashSet<String>();
+				for (int i = 0; i < sc.length; i++) {
+					t.scopes.add(Hex.hex2str(sc[i]));
+				}
+			}
+			
+			String id = map.get("ID");
+			if(token != null){
+				t.id = id;
+			}
+			
+			String asid = map.get("asID");
+			if(asid != null){
+				t.asid = asid.substring(2);
+			}
+			
+			String sign = map.get("Sign");
+			if(sign != null){
+				String[] ss = sign.substring("Sign-".length()).split("\\:");
 				
 				t.timestamp = Hex.hex2long(ss[0]);
 				t.sign = Hex.hex2bytearray(ss[1]);
-			}
-			
-			String[] sc = s[0].substring("Token-".length()).split("\\:");
-			t.scopes = new HashSet<String>();
-			for (int i = 0; i < sc.length; i++) {
-				t.scopes.add(Hex.hex2str(sc[i]));
-			}
-
-			t.id = s[1];
-			
-			if(s.length > 7){
-				t.asid = s[2];
 			}
 			
 			return t;
