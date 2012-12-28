@@ -14,6 +14,12 @@ import org.qrone.util.Hex;
 
 public class AccessToken {
 	
+	public static final String MASTER   = "M";
+	public static final String GRANT_READ    = "E";
+	public static final String GRANT_WRITE   = "I";
+	public static final String READ     = "R";
+	public static final String WRITE    = "W";
+	
 	//   Token-[Scope1][:[Scope2][:[Scope3]...]]
 	//   .ID-[userID]
 	//   [.asID-[asID]]
