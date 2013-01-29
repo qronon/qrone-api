@@ -23,21 +23,35 @@ public abstract class APIServlet extends HttpServlet{
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse resp){
 		
+		// Authorization header.
 		String auth = req.getHeader("Authorization");
 		if(auth != null){
 			if(auth.startsWith("Bearer")){
 				auth = auth.substring("Bearer".length()).trim();
 			}
-			
-			Token token = Token.parse(auth);
-			//token.validate(MasterKey.getSecret());
-			
 		}
+		
+		// Query parameter.
+		if(auth == null){
+			auth = req.getParameter("bearer_token");
+		}
+		
+		UUID uid = null;
+		
+		// Check token.
+		if(auth != null){
+			AccessToken at = AccessToken.parse(auth);
+			if(at.validate(MasterKey.getSecret(), AccessToken.WRITE)){
+				uid = ID.decrypeOpenID(at.getId(), 
+						MasterKey.getClientid(), MasterKey.getSecret());
+			}
+		}
+		
 		
 		Map map = new HashMap();
 		map.put("status", "ok");
 		
-		Object result = apiRequest(req, resp, null, map);
+		Object result = apiRequest(req, resp, uid, map);
 		if(result instanceof Integer){
 
 			try {
@@ -47,7 +61,7 @@ public abstract class APIServlet extends HttpServlet{
 		}else{
 			String json = JSON.encode(result);
 			try {
-				String type = req.getParameter(".type");
+				String type = req.getParameter(".format");
 				if(type != null){
 					type = type.toLowerCase();
 					if(type.equals("json")){

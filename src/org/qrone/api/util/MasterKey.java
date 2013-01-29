@@ -1,5 +1,7 @@
 package org.qrone.api.util;
 
+import java.util.UUID;
+
 import org.qrone.util.Token;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -16,42 +18,59 @@ public class MasterKey {
 		= MemcacheServiceFactory.getMemcacheService("qrone.setting");
 	public static DatastoreService store
 		= DatastoreServiceFactory.getDatastoreService();
-	public static Token token;
+	public static UUID clientid;
+	public static UUID clientsecret;
 
-	public static Token getSecret(){
-		
-		// try static
-		if(token != null){
-			return token;
+	public static UUID getClientid(){
+		if(clientid == null){
+			init();
 		}
+		return clientid;
+	}
+
+	public static UUID getSecret(){
+		if(clientsecret == null){
+			init();
+		}
+		return clientid;
+	}
+	
+	public static void init(){
 		
 		// try memcache
-		Object secreto = mem.get("secret");
-		if(secreto != null){
-			token = Token.parse(secreto.toString());
+		Object memobj = mem.get("secret");
+		if(memobj != null){
+			init(memobj.toString());
+			return;
 		}
 		
 		// try datastore
 		Key key = KeyFactory.createKey("qrone.setting", "secret");
 		try {
 			Entity e = store.get(key);
-			String k = (String)e.getProperty("key");
-			token = Token.parse(k);
-			
-			// store memcache
-			mem.put("secret", token.toString());
+			init( (String)e.getProperty("key") );
 			
 		} catch (EntityNotFoundException e) {
-			token = Token.generate("MASTER", null);
+			clientid = UUID.randomUUID();
+			clientsecret = UUID.randomUUID();
 			Entity e2 = new Entity(key);
-			e2.setProperty("key", token.toString());
+			String memstr = clientid.toString() + ":" + clientsecret.toString();
+			
+			e2.setProperty("key", memstr);
 			store.put(e2);
 
 			// store memcache
-			mem.put("secret", token.toString());
+			mem.put("secret", memstr);
 		}
 		
-		return token;
+		return;
+	}
+	
+	public static void init(String memstr){
+		String[] memary = memstr.split(":");
+		clientid = UUID.fromString(memary[0]);
+		clientsecret = UUID.fromString(memary[1]);
+		return;
 	}
 	
 }
